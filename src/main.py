@@ -4,7 +4,7 @@
 
 # Libraries
 import asyncio
-#import playwirght.async_api import async_playwright
+from playwright.async_api import async_playwright
 
 async def main() -> None:
     print("It's empty here, but hopefully we'll get some basic web scraping going.")

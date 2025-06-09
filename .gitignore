@@ -1,2 +1,3 @@
 misc/*
 frontend/src/misc/*
+backend/db.sqlite3

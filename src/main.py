@@ -2,10 +2,14 @@
 # - python 3.12
 # - playwright
 #   - run: playwright install (this installs all compatible browsers)
+# - django
 
 # Libraries
 import asyncio
+import django
 from playwright.async_api import async_playwright
+
+unavailable_version: str = "VERSION UNAVAILABLE"
 
 async def main() -> None:
     print("It's empty here, but hopefully we'll get some basic web scraping going.")
@@ -19,4 +23,6 @@ async def main() -> None:
             await browser.close()
 
 if __name__ == "__main__":
+    print("Version prints of all libraries...")
+    print(f"Django - {django.get_version()}\nPlaywright - {unavailable_version}")
     asyncio.run(main())

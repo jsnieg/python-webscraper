@@ -13,8 +13,8 @@ Tech stacks are ~~Playwright~~, Django/Flask and React + Vite for local dev. All
 - React + Vite
 - Colorama (console text color)
 
-  ### Authors
+### Authors
 
-  Janusz Snieg
+Janusz Snieg
 
-  ### Copyright
+### Copyright

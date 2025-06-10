@@ -24,6 +24,7 @@ _datetime: datetime = datetime.datetime.now()
 
 # TODO;
 # - scrape first 'n' number of movies visible
+# - classes (oop)
 
 def scrape_page(urls: list[str]=None, URL: str="") -> BeautifulSoup:
     """Method for scraping a list of URL pages/URL."""
@@ -32,6 +33,10 @@ def scrape_page(urls: list[str]=None, URL: str="") -> BeautifulSoup:
         features="html.parser", # gets rid of warning
     )
     return soup
+
+def scrape_movie_information(soup: BeautifulSoup) -> list[dict]:
+    """Method for scraping basic information about the movies e.g., titles and img URL"""
+    pass
 
 def main() -> None:
     colorama_init()

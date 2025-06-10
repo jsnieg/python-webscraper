@@ -1,47 +1,44 @@
 # Requirements
 # - python 3.12
-# - playwright
-#   - run: playwright install (this installs all compatible browsers)
+# - beautifulsoup
+# - colorama
 # - django
 
 # Libraries
 import asyncio
 import django
 import urllib.parse
+import requests
+from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
+from colorama import init as colorama_init
+from colorama import Fore, Style
 
 unavailable_version: str = "VERSION UNAVAILABLE"
 
+#async def main() -> None:
+#    pass
 
-async def main() -> None:
-    print('Setting default values for searching...')
-    text: str = 'Software Developer Jobs'
-    term: str = urllib.parse.quote_plus(text)
-    URL: str = f'http://www.google.com/search?q={term}'
+def main() -> None:
+    print(f'Initialising colorama to give console text color')
+    colorama_init()
+    print('Initialised.')
 
-    print("It's empty here, but hopefully we'll get some basic web scraping going.")
-    async with async_playwright() as pw:
-        browsers: list = [pw.firefox]
-        try:
-            for browser_type in browsers:
-                browser = await browser_type.launch()
-                page = await browser.new_page()
-                print(f'Going to the URL... {URL}\nFilling a text field area with input... {text}')
-                await page.goto(URL)
-                print(f"Please, don't arrest me... I have no ill aim.")
-                frame = page.frame_locator("iframe[title='reCAPTCHA']")
-                print(frame)
-                label = frame.locator("#recaptcha-anchor-label")
-                print(frame)
-                await page.get_by_text(frame).set_checked(True)
-                print(f'Taking a screenshot for testing...')
-                await page.screenshot(path=f'misc/example-{browser_type.name}.png') 
-                print(f'Closing browser...')
-                await browser.close()
-        except Exception as _exception:
-            print(_exception)
+    data: list = []
+    URL: str = 'https://letterboxd.com/films/popular/upcoming/'
+    print(f"Sending a get request to URL {Fore.BLUE}[{URL}]{Style.RESET_ALL}")
+    soup = BeautifulSoup(
+        requests.get(url=URL).text,
+        features="html.parser" # gets rid of warning
+    )
+    print(f'What a Beautiful Soup!')
+    # print(soup)
+    for lbx in soup.select('li.listitem'):
+        data.append({
+            'title': lbx.img.get('alt'),
+        })
+    print(data)
 
 if __name__ == "__main__":
-    print("Version prints of all libraries...")
-    print(f"Django - {django.get_version()}\nPlaywright - {unavailable_version}")
-    asyncio.run(main())
+    main()
+    # asyncio.run(main())

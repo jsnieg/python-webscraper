@@ -1,2 +1,4 @@
 misc/*
-src/misc/*
+frontend/src/misc/*
+backend/db.sqlite3
+backend/src/misc/*

@@ -12,6 +12,7 @@ Tech stacks are ~~Playwright~~, Django/Flask and React + Vite for local dev. All
 - Django
 - React + Vite
 - Colorama (console text color)
+- BeautifulSoup
 
 ### Authors
 

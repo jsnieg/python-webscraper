@@ -68,10 +68,14 @@ def scrape_movie_information(soup: BeautifulSoup) -> list[dict]:
             'title': lbx.img.get('alt'),
             'image_src': lbx.img.get('src'),
             'image_srcset': lbx.img.get('srcset'),
+            'rating': float(lbx['data-average-rating']),
         })
+    
+    average_rating: float = sum([d["rating"] for d in data]) / individual_movies_count
 
     print(f'\t{Fore.RED}*{Style.RESET_ALL}There are [{individual_movies_count}] movies on this page.')
     print(f'\t{Fore.RED}*{Style.RESET_ALL}There are potentially ~[{number_of_movies // individual_movies_count}] movies in this category.')
+    print(f'\t{Fore.RED}*{Style.RESET_ALL}Average rating is [{average_rating:.2f}] in this category.')
     return data
 
 def get_url_of_container(soup: BeautifulSoup) -> str | list[str]:
@@ -94,7 +98,7 @@ def main() -> None:
     URL: str = "https://letterboxd.com"
     PATH: str = "/films/popular/decade/2020s/"
     web_soup: BeautifulSoup = scrape_page(URL=URL+PATH)
-    container_url: BeautifulSoup = get_url_of_container(web_soup)
+    container_url: str = get_url_of_container(web_soup)
     container_soup: BeautifulSoup = scrape_page(URL=URL+container_url)
     scrape_movie_information(container_soup)
 

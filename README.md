@@ -10,6 +10,7 @@ Tech stacks are ~~Playwright~~, Django/Flask and React + Vite for local dev. All
 
 - ~~Playwright~~
 - Django
+- Django Rest Framework (DRF)
 - React + Vite
 - Colorama (console text color)
 - BeautifulSoup

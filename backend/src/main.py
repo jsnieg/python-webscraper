@@ -52,15 +52,20 @@ def scrape_movie_information(soup: BeautifulSoup) -> list[dict]:
 
         # Join string together and cast to int
         number_of_movies: int = int(''.join(text))
-    print(f'There are [{number_of_movies}] movies in total.')
+    print(f'\t{Fore.RED}*{Style.RESET_ALL}There are [{number_of_movies}] movies in total.')
 
+    individual_movies_count: int = 0
+    # Return all movie information
     for lbx in soup.select('li.listitem'):
+        individual_movies_count += 1
         data.append({
             'title': lbx.img.get('alt'),
             'image_src': lbx.img.get('src'),
             'image_srcset': lbx.img.get('srcset'),
         })
 
+    print(f'\t{Fore.RED}*{Style.RESET_ALL}There are [{individual_movies_count}] movies on this page.')
+    print(f'\t{Fore.RED}*{Style.RESET_ALL}There are potentially ~[{number_of_movies // individual_movies_count}] movies in this category.')
     return data
 
 def main() -> None:
@@ -68,7 +73,7 @@ def main() -> None:
     URL: str = 'https://letterboxd.com/films/ajax/popular/upcoming/?esiAllowFilters=true'
     soup: BeautifulSoup = scrape_page(URL=URL)
     data: list[dict] = scrape_movie_information(soup)
-    print(data)
+    #print(data)
 
 if __name__ == "__main__":
     main()

@@ -12,7 +12,6 @@ import requests
 import re
 import datetime
 from bs4 import BeautifulSoup, Tag
-from playwright.async_api import async_playwright
 from colorama import init as colorama_init
 from colorama import Fore, Style
 

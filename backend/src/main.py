@@ -27,19 +27,21 @@ unavailable_version: str = "VERSION UNAVAILABLE"
 def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
     """Method for scraping a list of URL pages/URL."""
     soup = None
-    print(f"[{datetime.datetime.now()}] Sending a get request to URL(s)\n{Fore.BLUE}[{urls}]{Style.RESET_ALL}")
+    print(f"[{datetime.datetime.now()}] Sending a get request to URL(s)\n\t{Fore.BLUE}[{urls}]{Style.RESET_ALL}")
     print(f'[{datetime.datetime.now()}] {Fore.GREEN}Scraping the webpage...{Style.RESET_ALL}')
-    # if urls == type(list) and urls != []:
-    #     try:
-    #         for url in urls:
-    #             soup = BeautifulSoup(
-    #                 markup=requests.get(url=url).text,
-    #                 features="html.parser", # gets rid of warning
-    #             )
-    #             return {soup} # needs refactoring, when urls is list it'll break.
-    #     except Exception as _exception:
-    #         print(_exception)
-    #         return
+    if urls == type(list) or urls != []:
+        try:
+            # for url in urls:
+            #     soup = BeautifulSoup(
+            #         markup=requests.get(url=url).text,
+            #         features="html.parser", # gets rid of warning
+            #     )
+            #     return {soup} # needs refactoring, when urls is list it'll break.
+            # print(urls)
+            pass
+        except Exception as _exception:
+            print(_exception)
+            return
     if urls == type(str) or urls != "":
         try:
             soup = BeautifulSoup(
@@ -54,27 +56,8 @@ def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
         print(f'\t{Fore.RED}*{Style.RESET_ALL} No specified URL.')
         return
 
-# def scrape_page(urls: list[str]=None, URL: str="") -> BeautifulSoup | None:
-#     """Method for scraping a list of URL pages/URL."""
-#     soup = None
-#     print(f"[{datetime.datetime.now()}] Sending a get request to URL\n{Fore.BLUE}[{URL}]{Style.RESET_ALL}")
-#     print(f'[{datetime.datetime.now()}] {Fore.GREEN}Scraping the webpage...{Style.RESET_ALL}')
-#     if (urls is not None) or (URL is not None) or (URL != ""):
-#         try:
-#             soup = BeautifulSoup(
-#                 markup=requests.get(url=URL).text,
-#                 features="html.parser", # gets rid of warning
-#             )
-#         except Exception as _exception:
-#             print(_exception)
-#             return
-#     else:
-#         print(f'\t{Fore.RED}*{Style.RESET_ALL}No specified URL.')
-#         return
-#     return soup
-
-def scrape_movie_information(soup: BeautifulSoup) -> list[dict]:
-    """Method for scraping basic information about the movies e.g., titles and img URL"""
+def scrape_poster_lists(soup: BeautifulSoup) -> list[dict]:
+    """Method for scraping basic information about the movie llist on the webpage not individual."""
     data: list[dict] = []
     number_of_movies: int = None
 
@@ -125,7 +108,7 @@ def get_url_of_container(soup: BeautifulSoup) -> str | list[str]:
         container: Tag = soup.find(name='div', attrs={'id': 'films-browser-list-container'})
         url_found: str | list[str] = container['data-url']
         if url_found:
-            print(f"[{datetime.datetime.now()}] URL found!\n{Fore.BLUE}[{url_found}]{Style.RESET_ALL}")
+            print(f"[{datetime.datetime.now()}] URL found!\n\t{Fore.BLUE}[{url_found}]{Style.RESET_ALL}")
             return url_found
         else:
             print(f"[{datetime.datetime.now()}]{Fore.RED} URL was not found!{Style.RESET_ALL}")
@@ -135,10 +118,12 @@ def get_url_of_container(soup: BeautifulSoup) -> str | list[str]:
         print(_exception)
         return ""
     
-def scrape_movie_details(url: str = "https://letterboxd.com/film/", path: list[str] = []) -> list[dict]:
+def scrape_movie_details(url: str = "https://letterboxd.com/film/", path: list[str] = []) -> None:
     """Scraping individual movie details e.g., description or movie poster."""
-    print(url+path)
-    print(scrape_page(urls=url+path))
+    full_url: str = url + path
+    data: BeautifulSoup = scrape_page(full_url)
+    prod_synopsis = data.find('div', class_='review body-text -prose -hero prettify').find('p').get_text()
+    print(prod_synopsis)
 
 def main() -> None:
     colorama_init()
@@ -148,8 +133,11 @@ def main() -> None:
     web_soup: BeautifulSoup = scrape_page(urls=URL+PATH)
     container_url: str = get_url_of_container(web_soup)
     container_soup: BeautifulSoup = scrape_page(urls=URL+container_url)
-    data=scrape_movie_information(container_soup)
-    # print([d['path'] for d in data][0])
+    data=scrape_poster_lists(container_soup)
+    # for dict_item in data:
+    #     for key in dict_item:
+    #         if key == 'path':
+    #            scrape_movie_details(path=dict_item[key])
     scrape_movie_details(path=[d['path'] for d in data][0])
 
 ##########################    

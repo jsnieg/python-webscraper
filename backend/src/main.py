@@ -39,8 +39,8 @@ class WebScraper():
 def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
     """Method for scraping a list of URL pages/URL."""
     soup = None
-    print(f"[{datetime.datetime.now()}] Sending a get request to URL(s)\n\t{Fore.BLUE}[{urls}]{Style.RESET_ALL}")
-    print(f'[{datetime.datetime.now()}] {Fore.GREEN}Scraping the webpage...{Style.RESET_ALL}')
+    print(f"[{datetime.datetime.now()}] Sending a get request to URL(s){Fore.BLUE}{Style.RESET_ALL}")
+    print(f'[{datetime.datetime.now()}] {Fore.GREEN}Scraping the webpage...{Style.RESET_ALL} {urls}')
     if urls == type(str) or urls != "":
         try:
             http_request: requests.Response = requests.get(url=urls)
@@ -52,8 +52,10 @@ def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
                 )
                 return soup
             else:
-                print(f"[{datetime.datetime.now()}]{Fore.RED} Bad GET Request, failed to trigger HTTP request.{Style.RESET_ALL}\n{http_request.headers}")
-                time.sleep(61)
+                bad_response: dict = dict(http_request.headers)
+                retry_after: int = int(bad_response['Retry-After'])
+                print(f"[{datetime.datetime.now()}]{Fore.RED} Bad GET Request, failed to trigger HTTP request. Retrying in [{retry_after}]s...{Style.RESET_ALL}")
+                time.sleep(retry_after)
                 return scrape_page(urls=urls)
         except Exception as _exception:
             print(_exception)
@@ -120,7 +122,6 @@ def get_url_of_container(soup: BeautifulSoup) -> str | list[str]:
         container: Tag = soup.find(name='div', attrs={'id': 'films-browser-list-container'})
         url_found: str | list[str] = container['data-url']
         if url_found:
-            print(f"[{datetime.datetime.now()}] URL found!\n\t{Fore.BLUE}[{url_found}]{Style.RESET_ALL}")
             return url_found
         else:
             print(f"[{datetime.datetime.now()}]{Fore.RED} URL was not found!{Style.RESET_ALL}")
@@ -140,8 +141,14 @@ def scrape_movie_details(url: str = "https://letterboxd.com/film/", path: list[s
             print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to scrape data is {type(data)}{Style.RESET_ALL}")
             return
         else:
-            prod_synopsis = data.find('div', class_='review body-text -prose -hero prettify').find('p').get_text()
-            print(prod_synopsis)
+            info: Tag | None = data.select_one('script[type="application/ld+json"]')
+            info = json.loads(info.text.split(' */')[1].split('/* ]]>')[0])
+            image_url: str = str(info['image'])
+            movie_name: str = str(info['name'])
+            prod_synopsis: str = data.find('div', class_='review body-text -prose -hero prettify').find('p').get_text()
+            img_data: bytes = requests.get(image_url).content
+            with open('misc/'+movie_name+'.jpg', 'wb') as handler:
+                handler.write(img_data)
     except Exception as _exception: 
         print(f"[{datetime.datetime.now()}]{Fore.RED} Could not scrape movie details.{Style.RESET_ALL}")
         print(_exception)
@@ -156,11 +163,11 @@ def main() -> None:
     container_url: str = get_url_of_container(web_soup)
     container_soup: BeautifulSoup = scrape_page(urls=URL+container_url)
     data=scrape_poster_lists(container_soup)
-    for dict_item in data:
-        for key in dict_item:
-            if key == 'path':
-               scrape_movie_details(path=dict_item[key])
-    # scrape_movie_details(path=[d['path'] for d in data][0])
+    # for dict_item in data:
+    #     for key in dict_item:
+    #         if key == 'path':
+    #            scrape_movie_details(path=dict_item[key])
+    scrape_movie_details(path=[d['path'] for d in data][0])
 
 ##########################    
 if __name__ == "__main__":

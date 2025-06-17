@@ -14,6 +14,7 @@ import datetime
 from bs4 import BeautifulSoup, Tag
 from colorama import init as colorama_init
 from colorama import Fore, Style
+from dataclasses import dataclass
 
 unavailable_version: str = "VERSION UNAVAILABLE"
 
@@ -24,6 +25,15 @@ unavailable_version: str = "VERSION UNAVAILABLE"
 # - scrape first 'n' number of movies visible
 # - classes (oop)
 
+@dataclass
+class WebScraper():
+    # def __init__(self, urls: list[str]):
+    #     self.URL = urls
+    urls: list[str]
+
+    def scrape_page(self, urls: list[str]) -> BeautifulSoup | None:
+        self.urls = urls
+
 def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
     """Method for scraping a list of URL pages/URL."""
     soup = None
@@ -32,6 +42,7 @@ def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
     if urls == type(str) or urls != "":
         try:
             http_request: requests.Response = requests.get(url=urls)
+            print(f'\t{Fore.RED}*{Style.RESET_ALL}Response {http_request.status_code}')
             if http_request.status_code == 200:
                 soup = BeautifulSoup(
                     markup=http_request.text,

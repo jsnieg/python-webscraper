@@ -11,6 +11,8 @@ import urllib.parse
 import requests
 import re
 import datetime
+import time
+import json
 from bs4 import BeautifulSoup, Tag
 from colorama import init as colorama_init
 from colorama import Fore, Style
@@ -50,8 +52,9 @@ def scrape_page(urls: list[str] | str=None) -> BeautifulSoup | None:
                 )
                 return soup
             else:
-                print(f"[{datetime.datetime.now()}]{Fore.RED} Bad GET Request, failed to trigger HTTP request.{Style.RESET_ALL}")
-                return
+                print(f"[{datetime.datetime.now()}]{Fore.RED} Bad GET Request, failed to trigger HTTP request.{Style.RESET_ALL}\n{http_request.headers}")
+                time.sleep(61)
+                return scrape_page(urls=urls)
         except Exception as _exception:
             print(_exception)
             return
@@ -130,6 +133,7 @@ def get_url_of_container(soup: BeautifulSoup) -> str | list[str]:
 def scrape_movie_details(url: str = "https://letterboxd.com/film/", path: list[str] = []) -> None:
     """Scraping individual movie details e.g., description or movie poster."""
     full_url: str = url + path
+    data = None
     try: 
         data: BeautifulSoup = scrape_page(full_url)
         if data == None or data == type(None):
@@ -141,6 +145,7 @@ def scrape_movie_details(url: str = "https://letterboxd.com/film/", path: list[s
     except Exception as _exception: 
         print(f"[{datetime.datetime.now()}]{Fore.RED} Could not scrape movie details.{Style.RESET_ALL}")
         print(_exception)
+        return
 
 def main() -> None:
     colorama_init()
@@ -151,11 +156,11 @@ def main() -> None:
     container_url: str = get_url_of_container(web_soup)
     container_soup: BeautifulSoup = scrape_page(urls=URL+container_url)
     data=scrape_poster_lists(container_soup)
-    # for dict_item in data:
-    #     for key in dict_item:
-    #         if key == 'path':
-    #            scrape_movie_details(path=dict_item[key])
-    scrape_movie_details(path=[d['path'] for d in data][0])
+    for dict_item in data:
+        for key in dict_item:
+            if key == 'path':
+               scrape_movie_details(path=dict_item[key])
+    # scrape_movie_details(path=[d['path'] for d in data][0])
 
 ##########################    
 if __name__ == "__main__":

@@ -55,30 +55,37 @@ async def scrape_page_for_urls(soup: BeautifulSoup) -> list[str]:
         return movie_urls
     except Exception as _exception:
         print(_exception)
+        return
 
 async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
     """
     Function to scrape all movie details of each individual URL.
     """
-
-    def find_only_actor(tag: Tag):
-        return tag.has_attr('')
-        pass    
-
     try:
         data: list[dict] = []
         cast_list: list[str] = []
+
         if soup is None:
             print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
             raise("Something went wrong with BeautifulSoup.")
+        
+        # Scrapes whole webpage that URL is on
         movie_content: Tag = soup.find(name='section', attrs={'class': 'inner_content movie_content backdrop poster'})
+
+        # Scrapes title and image URL information
         title_and_image: Tag = movie_content.find(name='div', attrs={'class': 'blurred'})
+
+        # Scrapes overview of the 'selected' movie
         overview: Tag = movie_content.find(name='div', attrs={'class': 'overview'})
+
+        # Attempt to scrape [Top] cast of the movie
         cast: Tag = movie_content.find(name='section', attrs={'class': 'panel top_billed scroller'})
         cast = cast.find(name='ol', attrs={'class': 'people scroller'}).find_all('li', attrs={'class': 'card'})
         for _cast in cast:
             cast_list.append(str(_cast.text).strip('\n'))
         print(cast_list[::2])
+
+        # Create obj/dict with all scraped information and selected attributes
         data.append({
             'Title': title_and_image.img.get('alt'),
             'Image URL': title_and_image.img.get('src'),
@@ -89,6 +96,7 @@ async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
         return data
     except Exception as _exception:
         print(_exception)
+        return
 
 async def main() -> None:
     async with aiohttp.ClientSession() as session:

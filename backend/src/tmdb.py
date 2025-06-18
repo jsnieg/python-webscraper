@@ -9,38 +9,43 @@ from colorama import Fore, Style
 web_url = 'https://www.themoviedb.org'
 
 async def scrape_page(urls):
-    soup: BeautifulSoup = BeautifulSoup(
-        markup = url
-    )
+    pass
+
+async def scrape_movie_details():
+    pass
 
 async def fetch(session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/') -> str:
-    """"""
-    async with session.get(url) as response:
-        if response.status == 200:
-            print(f"[{datetime.datetime.now()}]{Fore.GREEN} Response [{response.status}]{Style.RESET_ALL}")
-            return await response.text()
-        if response.status == 429:
-            print(f"[{datetime.datetime.now()}]{Fore.RED} Response [{response.status}]{Style.RESET_ALL}")
-        else:
-            response.raise_for_status()
+    """
+    Method for fetching webpage HTML as raw text.
+    """
+    print(f"[{datetime.datetime.now()}] Fetching HTML of URL [{Fore.BLUE}{url}{Style.RESET_ALL}]")
+    try:
+        async with session.get(url) as response:
+            if response.status == 200:
+                print(f"{Fore.GREEN}Response [{response.status}]{Style.RESET_ALL}")
+                return await response.text()
+            if response.status == 429:
+                print(f"{Fore.RED}Response [{response.status}]{Style.RESET_ALL}")
+            else:
+                response.raise_for_status()
+    except Exception as _exception:
+        print(_exception)
     
 async def fetch_all(session: aiohttp.ClientSession, urls: list[str]) -> list[dict]:
-    """"""
+    """
+    Method for fetching all webpages HTML(s) as raw text when a list is provided.
+    """
     results: list[dict] = []
-    # tasks: list = []
     for url in urls:
         url = web_url + url
-        print(url)
         task: asyncio.Task = asyncio.create_task(fetch(session=session, url=url))
         results.append({
             'url': url,
             'results': await task,
         })
-        # tasks.append(task)
-    # results = await asyncio.gather(*tasks) # * in this context means unpacking list
     return results
 
-async def main():
+async def main() -> None:
     movie_urls: list = list()
     async with aiohttp.ClientSession() as session:
         html_page: str = await fetch(session=session)
@@ -53,23 +58,19 @@ async def main():
         for movie in movies:
             # href for url
             movie_urls.append(movie['href'])
-        print(movie_urls)
         
     async with aiohttp.ClientSession() as session:
-        # Returns 
+        # Returns a list with corresponding URL and HTML as text result
         movies_html_page: list[dict] = await fetch_all(session=session, urls=movie_urls)
-        first_movie = movies_html_page[0]['results']
-        soup: BeautifulSoup = BeautifulSoup(
-            markup = first_movie,
-            features='lxml'
-        )
-        # print(soup)
-        media_results = soup.find(name='section', attrs={'id': 'original_header'})
-        # media_results.find('div', attrs={'class': 'blurred'})
-        print(media_results.find('div', attrs={'class': 'blurred'}))
-        l = media_results.find('div', attrs={'class': 'blurred'})
-        for _l in l:
-            print(l.img.get('alt'))
+        for item in movies_html_page:
+            soup: BeautifulSoup = BeautifulSoup(
+                markup = item['results'],
+                features='lxml'
+            )
+            media_results = soup.find(name='section', attrs={'id': 'original_header'})
+            l = media_results.find('div', attrs={'class': 'blurred'})
+            for _l in l:
+                print(l.img.get('alt'))
 
 if __name__ == '__main__':
     asyncio.run(main())

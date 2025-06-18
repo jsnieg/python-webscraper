@@ -2,23 +2,17 @@ import asyncio
 import requests
 import aiohttp
 import datetime
-from bs4 import BeautifulSoup, ResultSet
+from bs4 import BeautifulSoup, ResultSet, Tag
 from colorama import init as colorama_init
 from colorama import Fore, Style
 
 web_url = 'https://www.themoviedb.org'
 
-async def scrape_page(urls):
-    pass
-
-async def scrape_movie_details():
-    pass
-
 async def fetch(session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/') -> str:
     """
     Method for fetching webpage HTML as raw text.
     """
-    print(f"[{datetime.datetime.now()}] Fetching HTML of URL [{Fore.BLUE}{url}{Style.RESET_ALL}]")
+    print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
     try:
         async with session.get(url) as response:
             if response.status == 200:
@@ -45,20 +39,66 @@ async def fetch_all(session: aiohttp.ClientSession, urls: list[str]) -> list[dic
         })
     return results
 
+async def scrape_page_for_urls(soup: BeautifulSoup) -> list[str]:
+    """
+    Function utilising BeautifulSoup as parameter to scrape a URL of all URLs for each individual movies.
+    """
+    try:
+        if soup is None:
+            print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
+            raise("Something went wrong with BeautifulSoup.")
+        movie_urls: list = list()
+        movies: ResultSet = soup.find_all(name='a', attrs={'class': 'image'})
+        for movie in movies:
+            # href for url
+            movie_urls.append(movie['href'])
+        return movie_urls
+    except Exception as _exception:
+        print(_exception)
+
+async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
+    """
+    Function to scrape all movie details of each individual URL.
+    """
+
+    def find_only_actor(tag: Tag):
+        return tag.has_attr('')
+        pass    
+
+    try:
+        data: list[dict] = []
+        cast_list: list[str] = []
+        if soup is None:
+            print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
+            raise("Something went wrong with BeautifulSoup.")
+        movie_content: Tag = soup.find(name='section', attrs={'class': 'inner_content movie_content backdrop poster'})
+        title_and_image: Tag = movie_content.find(name='div', attrs={'class': 'blurred'})
+        overview: Tag = movie_content.find(name='div', attrs={'class': 'overview'})
+        cast: Tag = movie_content.find(name='section', attrs={'class': 'panel top_billed scroller'})
+        cast = cast.find(name='ol', attrs={'class': 'people scroller'}).find_all('li', attrs={'class': 'card'})
+        for _cast in cast:
+            cast_list.append(str(_cast.text).strip('\n'))
+        print(cast_list[::2])
+        data.append({
+            'Title': title_and_image.img.get('alt'),
+            'Image URL': title_and_image.img.get('src'),
+            'Description': overview.get_text(),
+            'Cast': None,
+        })
+        # print(data)
+        return data
+    except Exception as _exception:
+        print(_exception)
+
 async def main() -> None:
-    movie_urls: list = list()
     async with aiohttp.ClientSession() as session:
         html_page: str = await fetch(session=session)
         soup: BeautifulSoup = BeautifulSoup(
             markup=html_page,
             features='lxml'
         )
-        media_results = soup.find(name='section', attrs={'id': 'media_results'})
-        movies: ResultSet = soup.find_all(name='a', attrs={'class': 'image'})
-        for movie in movies:
-            # href for url
-            movie_urls.append(movie['href'])
-        
+        movie_urls = await scrape_page_for_urls(soup)
+
     async with aiohttp.ClientSession() as session:
         # Returns a list with corresponding URL and HTML as text result
         movies_html_page: list[dict] = await fetch_all(session=session, urls=movie_urls)
@@ -67,10 +107,7 @@ async def main() -> None:
                 markup = item['results'],
                 features='lxml'
             )
-            media_results = soup.find(name='section', attrs={'id': 'original_header'})
-            l = media_results.find('div', attrs={'class': 'blurred'})
-            for _l in l:
-                print(l.img.get('alt'))
+            await scrape_movie_details(soup)
 
 if __name__ == '__main__':
     asyncio.run(main())

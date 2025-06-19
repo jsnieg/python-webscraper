@@ -85,20 +85,20 @@ async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
         overview: Tag = movie_content.find(name='div', attrs={'class': 'overview'})
 
         # Create obj/dict with all scraped information and selected attributes
-        data.append({
+        return ({
             'Title': title_and_image.img.get('alt'),
             'Image URL': title_and_image.img.get('src'),
             'Description': overview.get_text(),
             'Cast': await scrape_cast_details(soup=soup),
         })
-        print(data)
-        return data
+
     except Exception as _exception:
         print(_exception)
         return
 
 async def main() -> None:
     movie_urls: list[str] = []
+    movie_data: list[dict] = []
 
     # Main page
     async with aiohttp.ClientSession() as session:
@@ -120,7 +120,8 @@ async def main() -> None:
                 markup = item['results'],
                 features='lxml'
             )
-            await scrape_movie_details(soup)
+            movie_data.append(await scrape_movie_details(soup))
+        print(movie_data)
 
 if __name__ == '__main__':
     asyncio.run(main())

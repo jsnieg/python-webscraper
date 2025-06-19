@@ -1,8 +1,6 @@
 import asyncio
-import requests
 import aiohttp
 import datetime
-import re
 from bs4 import BeautifulSoup, ResultSet, Tag
 from colorama import init as colorama_init
 from colorama import Fore, Style
@@ -72,7 +70,6 @@ async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
     """
     try:
         data: list[dict] = []
-        cast_list: list[str] = []
 
         if soup is None:
             print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")

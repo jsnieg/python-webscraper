@@ -2,6 +2,7 @@ import asyncio
 import requests
 import aiohttp
 import datetime
+import re
 from bs4 import BeautifulSoup, ResultSet, Tag
 from colorama import init as colorama_init
 from colorama import Fore, Style
@@ -57,6 +58,14 @@ async def scrape_page_for_urls(soup: BeautifulSoup) -> list[str]:
         print(_exception)
         return
 
+async def scrape_cast_details(soup: BeautifulSoup) -> list[str] | None:
+    """
+    Function to scrape all 'Top Billed Cast' and return it as list.
+    """
+    if soup:
+        cast = soup.find(name='section', attrs={'class': 'panel top_billed scroller'}).find_all(name='li', attrs={'class': 'card'})
+        return [_cast.find('p').get_text() for _cast in cast] # get_text() returns str
+
 async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
     """
     Function to scrape all movie details of each individual URL.
@@ -78,28 +87,25 @@ async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
         # Scrapes overview of the 'selected' movie
         overview: Tag = movie_content.find(name='div', attrs={'class': 'overview'})
 
-        # Attempt to scrape [Top] cast of the movie
-        cast: Tag = movie_content.find(name='section', attrs={'class': 'panel top_billed scroller'})
-        cast = cast.find(name='ol', attrs={'class': 'people scroller'}).find_all('li', attrs={'class': 'card'})
-        for _cast in cast:
-            cast_list.append(str(_cast.text).strip('\n'))
-        print(cast_list[::2])
-
         # Create obj/dict with all scraped information and selected attributes
         data.append({
             'Title': title_and_image.img.get('alt'),
             'Image URL': title_and_image.img.get('src'),
             'Description': overview.get_text(),
-            'Cast': None,
+            'Cast': await scrape_cast_details(soup=soup),
         })
-        # print(data)
+        print(data)
         return data
     except Exception as _exception:
         print(_exception)
         return
 
 async def main() -> None:
+    movie_urls: list[str] = []
+
+    # Main page
     async with aiohttp.ClientSession() as session:
+        print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
         html_page: str = await fetch(session=session)
         soup: BeautifulSoup = BeautifulSoup(
             markup=html_page,
@@ -107,7 +113,9 @@ async def main() -> None:
         )
         movie_urls = await scrape_page_for_urls(soup)
 
+    # Movie Information
     async with aiohttp.ClientSession() as session:
+        print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
         # Returns a list with corresponding URL and HTML as text result
         movies_html_page: list[dict] = await fetch_all(session=session, urls=movie_urls)
         for item in movies_html_page:

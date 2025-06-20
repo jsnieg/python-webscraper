@@ -7,7 +7,15 @@ from colorama import Fore, Style
 
 web_url = 'https://www.themoviedb.org'
 
-async def fetch(session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/') -> str:
+# TODO:
+# PUT request for creating URL to scrape
+# default on React-end: [/movie/, /movie/top-rated/, /movie/upcoming/, /movie/now-playing/]
+# GET request after PUT request is called
+# Authentication Demo with OAuth 2.0 [?]
+# Support for scraping TV shows [?]
+# Scrape more than just one page [https://www.themoviedb.org/movie/now-playing?page=2] ?page=2 is the key, could influence increment page number by 1 to 3/5. Probably 3 for testing.
+
+async def fetch(session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/top-rated/') -> str:
     """
     Method for fetching webpage HTML as raw text.
     """

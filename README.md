@@ -9,12 +9,11 @@ Tech stacks are Django/Flask and React + Vite for local dev. All subjects to cha
 ### Requirements
 
 - Python 3.13+
-- Django
-- Django Rest Framework (DRF)
 - React + Vite
 - Colorama (console text color)
 - BeautifulSoup
-- AIOHTTP
+- AIO HTTP
+- FastAPI
 
 ### Authors
 

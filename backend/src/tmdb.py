@@ -27,12 +27,12 @@ class ScrapeURL(BaseModel):
     """
     A class for defining the URL as string on PUT reqeuest call.
     """
-    # url: str | None = Field(
-    #     default=None,
-    #     title="A placeholder for the URL.",
-    #     max_length=300
-    # )
-    url: str | None
+    url: str | None = Field(
+        default=None,
+        title="A placeholder for the URL.",
+        max_length=300
+    )
+    # url: str | None
 
 @app.get("/test")
 async def test_api() -> dict:
@@ -46,7 +46,26 @@ async def get_url() -> dict:
     """
     A function that returns the set url when POST request was called.
     """
-    return {'Response': app.state.url}
+    try:
+        return {'Response': app.state.url}
+    except AttributeError as _exception:
+        return {'Response': _exception}
+
+@app.get("/test_fetch")
+async def test_fetch() -> dict:
+    try:
+        url: str = str(app.state.url)
+        async with aiohttp.ClientSession() as session:
+            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
+            html_page: str = await fetch(session=session, url=url)
+            soup: BeautifulSoup = BeautifulSoup(
+                markup=html_page,
+                features='lxml'
+            )
+            app.state.movie_urls = await scrape_page_for_urls(soup)
+            return {'Response': app.state.movie_urls}
+    except Exception as _exception:
+        return {'Response': _exception}
 
 @app.post("/set_url")
 # async def set_url(url: str | None, scrape_url: Annotated[ScrapeURL, Body(embed=True)]) -> str:

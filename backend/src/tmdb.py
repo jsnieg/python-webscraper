@@ -37,6 +37,7 @@ class ScrapeURL(BaseModel):
 @app.get("/test")
 async def test_api() -> dict:
     """
+    [GET]
     Call this GET method to see if API is infact working as intended.
     """
     return {'Fast':'API'}
@@ -44,6 +45,7 @@ async def test_api() -> dict:
 @app.get("/get_url")
 async def get_url() -> dict:
     """
+    [GET]
     A function that returns the set url when POST request was called.
     """
     try:
@@ -51,19 +53,40 @@ async def get_url() -> dict:
     except AttributeError as _exception:
         return {'Response': _exception}
 
-@app.get("/test_fetch")
-async def test_fetch() -> dict:
+movie_data: list[str] = []
+@app.get("/scrape_page")
+async def fetch() -> dict:
+    """
+    [GET]
+    Function to fetch all urls on the site.
+    """
     try:
         url: str = str(app.state.url)
+
+        # Main page
         async with aiohttp.ClientSession() as session:
             print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
-            html_page: str = await fetch(session=session, url=url)
+            # html_page: str = await fetch(session=session, url=url)
+            html_page: str = await fetch(session=session)
             soup: BeautifulSoup = BeautifulSoup(
                 markup=html_page,
                 features='lxml'
             )
             app.state.movie_urls = await scrape_page_for_urls(soup)
-            return {'Response': app.state.movie_urls}
+            # return {'Response': app.state.movie_urls}
+        
+        # Movie Information
+        async with aiohttp.ClientSession() as session:
+            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
+            # Returns a list with corresponding URL and HTML as text result
+            movies_html_page: list[dict] = await fetch_all(session=session, urls=app.state.movie_urls)
+            for item in movies_html_page:
+                soup: BeautifulSoup = BeautifulSoup(
+                    markup = item['results'],
+                    features='lxml'
+                )
+                movie_data.append(await scrape_movie_details(soup))
+        return {'Response': movie_data}
     except Exception as _exception:
         return {'Response': _exception}
 
@@ -71,6 +94,7 @@ async def test_fetch() -> dict:
 # async def set_url(url: str | None, scrape_url: Annotated[ScrapeURL, Body(embed=True)]) -> str:
 async def set_url(url: str, scrape_url: ScrapeURL) -> dict:
     """
+    [POST]
     A function that sets current str for usage.
 
     Only acceptable URL is TMDB (https://www.themoviedb.org).
@@ -167,33 +191,3 @@ async def scrape_movie_details(soup: BeautifulSoup) -> list[dict] | None:
     except Exception as _exception:
         print(_exception)
         return
-
-async def main() -> None:
-    movie_urls: list[str] = []
-    movie_data: list[dict] = []
-
-    # Main page
-    async with aiohttp.ClientSession() as session:
-        print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
-        html_page: str = await fetch(session=session)
-        soup: BeautifulSoup = BeautifulSoup(
-            markup=html_page,
-            features='lxml'
-        )
-        movie_urls = await scrape_page_for_urls(soup)
-
-    # Movie Information
-    async with aiohttp.ClientSession() as session:
-        print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
-        # Returns a list with corresponding URL and HTML as text result
-        movies_html_page: list[dict] = await fetch_all(session=session, urls=movie_urls)
-        for item in movies_html_page:
-            soup: BeautifulSoup = BeautifulSoup(
-                markup = item['results'],
-                features='lxml'
-            )
-            movie_data.append(await scrape_movie_details(soup))
-        print(movie_data)
-
-if __name__ == '__main__':
-    asyncio.run(main())

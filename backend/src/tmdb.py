@@ -55,7 +55,7 @@ async def get_url() -> dict:
 
 movie_data: list[str] = []
 @app.get("/scrape_page")
-async def fetch() -> dict:
+async def scrape_page() -> dict:
     """
     [GET]
     Function to fetch all urls on the site.

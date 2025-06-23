@@ -15,6 +15,19 @@ Tech stacks are Django/Flask and React + Vite for local dev. All subjects to cha
 - AIO HTTP
 - FastAPI
 
+### Running Locally
+
+Clone the repository
+
+- `git clone https://github.com/jsnieg/python-webscraper.git <optional directory>`
+
+Install dependecies
+
+- Move into the directory `cd python-webscraper`
+- `pip install -r 'requirements.txt'`
+
+Run `python backend/src/run.py` in Terminal
+
 ### Authors
 
 Janusz Snieg

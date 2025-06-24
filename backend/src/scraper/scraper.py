@@ -54,6 +54,7 @@ class Scraper():
         )
 
     # Fetch HTML information about a page
+    # TODO: when fetch is called no url is set therefore default is used
     async def fetch(self, session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/top-rated/') -> str:
         """
         Method for fetching webpage HTML as raw text.

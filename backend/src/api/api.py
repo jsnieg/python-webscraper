@@ -1,5 +1,5 @@
 # Scrape Package
-from scraper.scraper import *
+from scraper.scraper import Scraper
 
 # FastAPI
 from typing import Annotated
@@ -9,6 +9,9 @@ from pydantic import BaseModel, Field
 web_url = 'https://www.themoviedb.org'
 
 app = FastAPI()
+
+# When POST is called, scraper is assigned with Scraper() class.
+scraper = Scraper()
 
 # TODO:
 # POST request for creating URL to scrape
@@ -33,6 +36,7 @@ class ScrapeURL(BaseModel):
 async def test_api() -> dict:
     """
     [GET]
+
     Call this GET method to see if API is infact working as intended.
     """
     return {'Fast':'API'}
@@ -41,10 +45,11 @@ async def test_api() -> dict:
 async def get_url() -> dict:
     """
     [GET]
+
     A function that returns the set url when POST request was called.
     """
     try:
-        return {'Response': app.state.url}
+        return {'Response': app.state.url, 'Class': scraper.url}
     except AttributeError as _exception:
         return {'Response': _exception}
 
@@ -53,47 +58,27 @@ movie_data: list[str] = []
 async def scrape_page() -> dict:
     """
     [GET]
+
     Function to fetch all urls on the site.
     """
     try:
-        url: str = str(app.state.url)
-
-        # Main page
-        async with aiohttp.ClientSession() as session:
-            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
-            # html_page: str = await fetch(session=session, url=url)
-            html_page: str = await fetch(session=session)
-            soup: BeautifulSoup = BeautifulSoup(
-                markup=html_page,
-                features='lxml'
-            )
-            app.state.movie_urls = await scrape_page_for_urls(soup)
-            # return {'Response': app.state.movie_urls}
-        
-        # Movie Information
-        async with aiohttp.ClientSession() as session:
-            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
-            # Returns a list with corresponding URL and HTML as text result
-            movies_html_page: list[dict] = await fetch_all(session=session, urls=app.state.movie_urls)
-            for item in movies_html_page:
-                soup: BeautifulSoup = BeautifulSoup(
-                    markup = item['results'],
-                    features='lxml'
-                )
-                movie_data.append(await scrape_movie_details(soup))
+        movie_data: list[str] = await scraper.fetch_information()
         return {'Response': movie_data}
     except Exception as _exception:
-        return {'Response': _exception}
+        print(_exception)
+        return {'Response': 'Error'}
 
 @app.post("/set_url")
 # async def set_url(url: str | None, scrape_url: Annotated[ScrapeURL, Body(embed=True)]) -> str:
 async def set_url(url: str, scrape_url: ScrapeURL) -> dict:
     """
     [POST]
+
     A function that sets current str for usage.
 
     Only acceptable URL is TMDB (https://www.themoviedb.org).
     """
     # https://stackoverflow.com/questions/71260288/how-to-share-variables-between-http-requests-in-fastapi
     app.state.url = url
+    scraper.url = url
     return {'Response': app.state.url}

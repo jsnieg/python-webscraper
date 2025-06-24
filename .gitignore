@@ -1,4 +1,4 @@
 frontend/src/misc/*
 backend/db.sqlite3
 backend/src/misc/*
-backend/src/__pycache__
+backend/src/api/__pycache__

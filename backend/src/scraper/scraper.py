@@ -27,13 +27,13 @@ class Scraper():
             print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
             html_page: str = await self.fetch(session=session)
             soup: BeautifulSoup = self.scrape(html_page=html_page, features='lxml')
-            movie_urls: list[str] = await self.scrape_page_for_urls(soup)
+            movie_paths: list[str] = await self.scrape_page_for_paths(soup)
 
         # Movie Information
         async with aiohttp.ClientSession() as session:
             print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
             # Returns a list with corresponding URL and HTML as text result
-            movies_html_page: list[dict] = await self.fetch_all(session=session, urls=movie_urls)
+            movies_html_page: list[dict] = await self.fetch_all(session=session, paths=movie_paths)
             for item in movies_html_page:
                 soup: BeautifulSoup = self.scrape(
                     html_page=item['results'], 
@@ -72,14 +72,14 @@ class Scraper():
             print(_exception)
         
     # Fetch HTML information about all pages   
-    async def fetch_all(self, session: aiohttp.ClientSession, urls: list[str]) -> list[dict]:
+    async def fetch_all(self, session: aiohttp.ClientSession, paths: list[str]) -> list[dict]:
         """
         Method for fetching all webpages HTML(s) as raw text when a list is provided.
         """
         web_url = 'https://www.themoviedb.org'
         results: list[dict] = []
-        for url in urls:
-            url = web_url + url
+        for path in paths:
+            url = web_url + path
             task: asyncio.Task = asyncio.create_task(self.fetch(session=session, url=url))
             results.append({
                 'url': url,
@@ -87,20 +87,20 @@ class Scraper():
             })
         return results
 
-    async def scrape_page_for_urls(self, soup: BeautifulSoup) -> list[str]:
+    async def scrape_page_for_paths(self, soup: BeautifulSoup) -> list[str]:
         """
-        Function utilising BeautifulSoup as parameter to scrape a URL of all URLs for each individual movies.
+        Function utilising BeautifulSoup as parameter to scrape a URL of all paths for each individual movies.
         """
         try:
             if soup is None:
                 print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
                 raise("Something went wrong with BeautifulSoup.")
-            movie_urls: list = list()
+            movie_paths: list = list()
             movies: ResultSet = soup.find_all(name='a', attrs={'class': 'image'})
             for movie in movies:
                 # href for url
-                movie_urls.append(movie['href'])
-            return movie_urls
+                movie_paths.append(movie['href'])
+            return movie_paths
         except Exception as _exception:
             print(_exception)
             return
@@ -160,13 +160,13 @@ async def main() -> None:
             markup=html_page,
             features='lxml'
         )
-        movie_urls = await scraper.scrape_page_for_urls(soup)
+        movie_urls = await scraper.scrape_page_for_paths(soup)
 
     # Movie Information
     async with aiohttp.ClientSession() as session:
         print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
         # Returns a list with corresponding URL and HTML as text result
-        movies_html_page: list[dict] = await scraper.fetch_all(session=session, urls=movie_urls)
+        movies_html_page: list[dict] = await scraper.fetch_all(session=session, paths=movie_urls)
         for item in movies_html_page:
             soup: BeautifulSoup = BeautifulSoup(
                 markup = item['results'],

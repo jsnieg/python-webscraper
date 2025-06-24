@@ -33,23 +33,23 @@ class ScrapeURL(BaseModel):
     # url: str | None
 
 @app.get("/test")
-async def test_api() -> dict:
+async def status() -> dict:
     """
-    [GET]
+    **[GET]**
 
-    Call this GET method to see if API is infact working as intended.
+    Call this GET method to see status of the API, whether the call was authorised or not.
     """
-    return {'Fast':'API'}
+    return {'Response': str(True)}
 
 @app.get("/get_url")
 async def get_url() -> dict:
     """
-    [GET]
+    **[GET]**
 
     A function that returns the set url when POST request was called.
     """
     try:
-        return {'Response': app.state.url, 'Class': scraper.url}
+        return {'Response': scraper.url}
     except AttributeError as _exception:
         return {'Response': _exception}
 
@@ -57,7 +57,7 @@ movie_data: list[str] = []
 @app.get("/scrape_pages")
 async def scrape_pages() -> dict:
     """
-    [GET]
+    **[GET]**
 
     Function to fetch all information about the movies by scraping each URL individually.
     """
@@ -70,15 +70,19 @@ async def scrape_pages() -> dict:
 
 @app.post("/set_url")
 # async def set_url(url: str | None, scrape_url: Annotated[ScrapeURL, Body(embed=True)]) -> str:
-async def set_url(url: str, scrape_url: ScrapeURL) -> dict:
+async def set_url(url: str, pages: int = 1, scrape_url: ScrapeURL = ScrapeURL) -> dict:
     """
-    [POST]
+    **[POST]**
 
     A function that sets current str for usage.
 
     Only acceptable URL is TMDB (https://www.themoviedb.org).
+
+    **Parameters**:
+
+    url (string) variable that sets a URL to scrape\n
+    pages (int) variable that sets how many pages to scrape by default is 1 
     """
     # https://stackoverflow.com/questions/71260288/how-to-share-variables-between-http-requests-in-fastapi
-    app.state.url = url
     scraper.url = url
-    return {'Response': app.state.url}
+    return {'Response': scraper.url}

@@ -54,12 +54,12 @@ async def get_url() -> dict:
         return {'Response': _exception}
 
 movie_data: list[str] = []
-@app.get("/scrape_page")
-async def scrape_page() -> dict:
+@app.get("/scrape_pages")
+async def scrape_pages() -> dict:
     """
     [GET]
 
-    Function to fetch all urls on the site.
+    Function to fetch all information about the movies by scraping each URL individually.
     """
     try:
         movie_data: list[str] = await scraper.fetch_information()

@@ -16,9 +16,10 @@ class Scraper():
         self.url: str = url
         self.movie_data: list[str] = []
 
+    # Fetch information of all movies and return list of that data
     async def fetch_information(self):
         """
-        ?
+        Function that fetches information of all movies and return list of that data.
         """
 
         # Main page
@@ -42,6 +43,7 @@ class Scraper():
 
         return self.movie_data
 
+    # Function returning BeautifulSoup object each time it's called
     def scrape(self, html_page: str, features: str) -> BeautifulSoup:
         """
         Method for scraping a webpage given that html_page is response of the web in string form.
@@ -51,6 +53,7 @@ class Scraper():
             features=features
         )
 
+    # Fetch HTML information about a page
     async def fetch(self, session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/top-rated/') -> str:
         """
         Method for fetching webpage HTML as raw text.
@@ -68,6 +71,7 @@ class Scraper():
         except Exception as _exception:
             print(_exception)
         
+    # Fetch HTML information about all pages   
     async def fetch_all(self, session: aiohttp.ClientSession, urls: list[str]) -> list[dict]:
         """
         Method for fetching all webpages HTML(s) as raw text when a list is provided.

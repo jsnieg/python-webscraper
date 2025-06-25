@@ -1,12 +1,14 @@
-# python-webscraper
+# TMDB Webscraper
+
+## Introduction
 
 Right now, it's empty. 
 
 Shifting focus from creating a web scraper of job postings to something more **free**, **legal** and **easier** from [TMDB](https://www.themoviedb.org/) which does not infringe on user's private data and displays it onto a React front-end with Python back-end by pressing a button 'Scrape'. As I have found a major roadblock and most internet devs struggled in creating a scraper of latter idea. I want to learn and not rip my hair out.
 
-Tech stacks are FastAPI and React + Vite for local dev. All subjects to change, I suppose. Idk, what I'm doing but I got an idea.
+Tech stacks are FastAPI in Python and React + Vite for local dev. All subjects to change, I suppose. Idk, what I'm doing but I got an idea.
 
-### Requirements
+## Requirements
 
 - Python 3.13+
 - React + Vite
@@ -15,7 +17,7 @@ Tech stacks are FastAPI and React + Vite for local dev. All subjects to change, 
 - AIO HTTP
 - FastAPI
 
-### Running Locally
+## Running Locally
 
 Clone the repository
 
@@ -26,10 +28,12 @@ Install dependecies
 - Move into the directory `cd python-webscraper`
 - `pip install -r 'requirements.txt'`
 
-Run `python backend/src/run.py` or `cd backend/src/api` then `fastapi dev api.py` (or replace dev with run to run without Hot Loading) in Terminal 
+Running the backend
 
-### Authors
+- `python backend/src/run.py` or `cd backend/src/api` then `fastapi run api.py`.
+
+## Authors
 
 Janusz Snieg
 
-### Copyright
+## Copyright

@@ -69,8 +69,11 @@ async def scrape_pages() -> dict:
         return {'Response': 'Error'}
 
 @app.post("/set_url")
-# async def set_url(url: str | None, scrape_url: Annotated[ScrapeURL, Body(embed=True)]) -> str:
-async def set_url(url: str, pages: int = 1, scrape_url: ScrapeURL = ScrapeURL) -> dict:
+async def set_url(
+    url: str, 
+    pages: int = 1, 
+    scrape_url: ScrapeURL = ScrapeURL
+) -> dict:
     """
     **[POST]**
 

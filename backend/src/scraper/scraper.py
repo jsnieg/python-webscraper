@@ -9,14 +9,16 @@ class Scraper():
     """
     Scraper class object, created upon call and has passed str URL for all the execution.
     """
-    def __init__(self, url: str = None):
+    def __init__(
+            self, 
+            url: str = None
+        ):
         """
         Constructor assigning str to a class visible variable.
         """
         self.url: str = url
         self.movie_data: list[str] = []
 
-    # Fetch information of all movies and return list of that data
     async def fetch_information(self):
         """
         Function that fetches information of all movies and return list of that data.
@@ -24,14 +26,14 @@ class Scraper():
 
         # Main page
         async with aiohttp.ClientSession() as session:
-            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
+            #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
             html_page: str = await self.fetch(session=session)
             soup: BeautifulSoup = self.scrape(html_page=html_page, features='lxml')
             movie_paths: list[str] = await self.scrape_page_for_paths(soup)
 
         # Movie Information
         async with aiohttp.ClientSession() as session:
-            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
+            #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
             # Returns a list with corresponding URL and HTML as text result
             movies_html_page: list[dict] = await self.fetch_all(session=session, paths=movie_paths)
             for item in movies_html_page:
@@ -41,10 +43,14 @@ class Scraper():
                 )
                 self.movie_data.append(await self.scrape_movie_details(soup))
 
+        print(f"[{datetime.datetime.now()}] [{Fore.GREEN}*{Style.RESET_ALL}] Done")
         return self.movie_data
 
-    # Function returning BeautifulSoup object each time it's called
-    def scrape(self, html_page: str, features: str) -> BeautifulSoup:
+    def scrape(
+            self, 
+            html_page: str, 
+            features: str
+        ) -> BeautifulSoup:
         """
         Method for scraping a webpage given that html_page is response of the web in string form.
         """
@@ -53,17 +59,21 @@ class Scraper():
             features=features
         )
 
-    # Fetch HTML information about a page
     # TODO: when fetch is called no url is set therefore default is used
-    async def fetch(self, session: aiohttp.ClientSession, url: str = 'https://www.themoviedb.org/movie/top-rated/') -> str:
+    async def fetch(
+            self, 
+            session: aiohttp.ClientSession, 
+            url: str = 'https://www.themoviedb.org/movie/top-rated/'
+        ) -> str:
         """
         Method for fetching webpage HTML as raw text.
         """
-        print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
+        
+        #print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
         try:
             async with session.get(url) as response:
                 if response.status == 200:
-                    print(f"{Fore.GREEN}Response [{response.status}]{Style.RESET_ALL}")
+                    #print(f"{Fore.GREEN}Response [{response.status}]{Style.RESET_ALL}")
                     return await response.text()
                 if response.status == 429:
                     print(f"{Fore.RED}Response [{response.status}]{Style.RESET_ALL}")
@@ -71,9 +81,12 @@ class Scraper():
                     response.raise_for_status()
         except Exception as _exception:
             print(_exception)
-        
-    # Fetch HTML information about all pages   
-    async def fetch_all(self, session: aiohttp.ClientSession, paths: list[str]) -> list[dict]:
+           
+    async def fetch_all(
+            self, 
+            session: aiohttp.ClientSession, 
+            paths: list[str]
+        ) -> list[dict]:
         """
         Method for fetching all webpages HTML(s) as raw text when a list is provided.
         """
@@ -88,7 +101,10 @@ class Scraper():
             })
         return results
 
-    async def scrape_page_for_paths(self, soup: BeautifulSoup) -> list[str]:
+    async def scrape_page_for_paths(
+            self, 
+            soup: BeautifulSoup
+        ) -> list[str]:
         """
         Function utilising BeautifulSoup as parameter to scrape a URL of all paths for each individual movies.
         """
@@ -106,7 +122,10 @@ class Scraper():
             print(_exception)
             return
 
-    async def scrape_cast_details(self, soup: BeautifulSoup) -> list[str] | None:
+    async def scrape_cast_details(
+            self, 
+            soup: BeautifulSoup
+        ) -> list[str] | None:
         """
         Function to scrape all 'Top Billed Cast' and return it as list.
         """
@@ -114,7 +133,10 @@ class Scraper():
             cast = soup.find(name='section', attrs={'class': 'panel top_billed scroller'}).find_all(name='li', attrs={'class': 'card'})
             return [_cast.find('p').get_text() for _cast in cast] # get_text() returns str
 
-    async def scrape_movie_details(self, soup: BeautifulSoup) -> list[dict] | None:
+    async def scrape_movie_details(
+            self, 
+            soup: BeautifulSoup
+        ) -> list[dict] | None:
         """
         Function to scrape all movie details of each individual URL.
         """
@@ -145,36 +167,3 @@ class Scraper():
         except Exception as _exception:
             print(_exception)
             return
-
-# Local testing without running FastAPI    
-async def main() -> None:
-    scraper = Scraper()
-
-    movie_urls: list[str] = []
-    movie_data: list[dict] = []
-
-    # Main page
-    async with aiohttp.ClientSession() as session:
-        print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
-        html_page: str = await scraper.fetch(session=session)
-        soup: BeautifulSoup = BeautifulSoup(
-            markup=html_page,
-            features='lxml'
-        )
-        movie_urls = await scraper.scrape_page_for_paths(soup)
-
-    # Movie Information
-    async with aiohttp.ClientSession() as session:
-        print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
-        # Returns a list with corresponding URL and HTML as text result
-        movies_html_page: list[dict] = await scraper.fetch_all(session=session, paths=movie_urls)
-        for item in movies_html_page:
-            soup: BeautifulSoup = BeautifulSoup(
-                markup = item['results'],
-                features='lxml'
-            )
-            movie_data.append(await scraper.scrape_movie_details(soup))
-        print(movie_data)
-
-if __name__ == '__main__':
-    asyncio.run(main())

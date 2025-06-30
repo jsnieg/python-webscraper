@@ -23,12 +23,13 @@ async def main() -> None:
     # Main page
     async with aiohttp.ClientSession() as session:
         #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
-        html_page: str = await scraper.fetch(session=session, url=scraper.url)
+        html_page: str = await scraper.fetch(session=session, url=url)
         soup: BeautifulSoup = BeautifulSoup(
             markup=html_page,
             features='lxml'
         )
         movie_urls = await scraper.scrape_page_for_paths(soup)
+        print(movie_urls)
 
     # Movie Information
     async with aiohttp.ClientSession() as session:

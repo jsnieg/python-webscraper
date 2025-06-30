@@ -71,7 +71,6 @@ class Scraper():
         """
         Method for fetching webpage HTML as raw text.
         """
-        url = self.url
         # print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
         try:
             async with session.get(url) as response:
@@ -94,12 +93,21 @@ class Scraper():
         Method for fetching all webpages HTML(s) as raw text when a list is provided.
         """
         #https://www.themoviedb.org/movie?page=2
-        for i in range(0, 3):
-            # print(f'{self.url}?page={i}')
-            pass
+        results: list[dict] = []
         parsed_url: ParseResult = urlparse(self.url)
         parsed_url: str = f'{parsed_url.scheme}://{parsed_url.netloc}'
-        results: list[dict] = []
+        # for i in range(0, 3):
+        #     print(f'{self.url}?page={i}')
+        #     for path in paths:
+        #         url = f'{parsed_url}{path}?page={i}'
+        #         print(url)
+        #         task: asyncio.Task = asyncio.create_task(self.fetch(session=session, url=url))
+        #         results.append({
+        #             'url': url,
+        #             'results': await task,
+        #         })
+        # return results
+
         for path in paths:
             url = parsed_url + path
             print(url)
@@ -118,9 +126,6 @@ class Scraper():
         Function utilising BeautifulSoup as parameter to scrape a URL of all paths for each individual movies.
         """
         try:
-            if soup is None:
-                print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
-                raise("Something went wrong with BeautifulSoup.")
             movie_paths: list = list()
             movies: ResultSet = soup.find_all(name='a', attrs={'class': 'image'})
             for movie in movies:
@@ -158,12 +163,15 @@ class Scraper():
             
             # Scrapes whole webpage that URL is on
             movie_content: Tag = soup.find(name='section', attrs={'class': 'inner_content movie_content backdrop poster'})
+            # print(movie_content)
 
             # Scrapes title and image URL information
             title_and_image: Tag = movie_content.find(name='div', attrs={'class': 'blurred'})
+            # print(title_and_image)
 
             # Scrapes overview of the 'selected' movie
             overview: Tag = movie_content.find(name='div', attrs={'class': 'overview'})
+            # print(overview)
 
             # Create obj/dict with all scraped information and selected attributes
             return ({

@@ -14,10 +14,16 @@ async def main() -> None:
     movie_urls: list[str] = []
     movie_data: list[dict] = []
 
+    # url: str = 'https://www.themoviedb.org/'
+    url: str = 'https://www.themoviedb.org/movie/now-playing'
+    #'https://www.themoviedb.org/movie/now-playing'
+
+    scraper.url = url
+
     # Main page
     async with aiohttp.ClientSession() as session:
         #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
-        html_page: str = await scraper.fetch(session=session)
+        html_page: str = await scraper.fetch(session=session, url=scraper.url)
         soup: BeautifulSoup = BeautifulSoup(
             markup=html_page,
             features='lxml'

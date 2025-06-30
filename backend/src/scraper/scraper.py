@@ -4,6 +4,7 @@ import datetime
 from bs4 import BeautifulSoup, ResultSet, Tag
 from colorama import init as colorama_init
 from colorama import Fore, Style
+from urllib.parse import urlparse, ParseResult
 
 class Scraper():
     """
@@ -11,12 +12,14 @@ class Scraper():
     """
     def __init__(
             self, 
-            url: str = None
+            url: str = None,
+            pages: int = None
         ):
         """
         Constructor assigning str to a class visible variable.
         """
         self.url: str = url
+        self.pages = pages
         self.movie_data: list[str] = []
 
     async def fetch_information(self):
@@ -26,14 +29,14 @@ class Scraper():
 
         # Main page
         async with aiohttp.ClientSession() as session:
-            #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
+            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
             html_page: str = await self.fetch(session=session)
             soup: BeautifulSoup = self.scrape(html_page=html_page, features='lxml')
             movie_paths: list[str] = await self.scrape_page_for_paths(soup)
 
         # Movie Information
         async with aiohttp.ClientSession() as session:
-            #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
+            print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
             # Returns a list with corresponding URL and HTML as text result
             movies_html_page: list[dict] = await self.fetch_all(session=session, paths=movie_paths)
             for item in movies_html_page:
@@ -63,13 +66,13 @@ class Scraper():
     async def fetch(
             self, 
             session: aiohttp.ClientSession, 
-            url: str = 'https://www.themoviedb.org/movie/top-rated/'
+            url: str
         ) -> str:
         """
         Method for fetching webpage HTML as raw text.
         """
-        
-        #print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
+        url = self.url
+        # print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
         try:
             async with session.get(url) as response:
                 if response.status == 200:
@@ -90,10 +93,16 @@ class Scraper():
         """
         Method for fetching all webpages HTML(s) as raw text when a list is provided.
         """
-        web_url = 'https://www.themoviedb.org'
+        #https://www.themoviedb.org/movie?page=2
+        for i in range(0, 3):
+            # print(f'{self.url}?page={i}')
+            pass
+        parsed_url: ParseResult = urlparse(self.url)
+        parsed_url: str = f'{parsed_url.scheme}://{parsed_url.netloc}'
         results: list[dict] = []
         for path in paths:
-            url = web_url + path
+            url = parsed_url + path
+            print(url)
             task: asyncio.Task = asyncio.create_task(self.fetch(session=session, url=url))
             results.append({
                 'url': url,

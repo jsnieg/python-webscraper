@@ -81,6 +81,8 @@ async def set_url(
 
     Only acceptable URL is TMDB (https://www.themoviedb.org).
 
+    Set amount pages you wish to scrape, default is 1. Recommended value is between 3/5.
+
     **Parameters**:
 
     url (string) variable that sets a URL to scrape\n
@@ -88,4 +90,10 @@ async def set_url(
     """
     # https://stackoverflow.com/questions/71260288/how-to-share-variables-between-http-requests-in-fastapi
     scraper.url = url
-    return {'Response': scraper.url}
+    scraper.pages = pages
+    return {
+        'Response': {
+            'URL': scraper.url,
+            'Pages': scraper.pages
+        }
+    }

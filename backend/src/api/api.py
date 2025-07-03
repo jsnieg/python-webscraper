@@ -14,7 +14,7 @@ app = FastAPI()
 scraper = Scraper()
 
 # TODO:
-# POST request for creating URL to scrape
+# Scrape more than 1 page
 # default on React-end: [/movie/, /movie/top-rated/, /movie/upcoming/, /movie/now-playing/]
 # GET request after PUT request is called
 # Authentication Demo with OAuth 2.0 [?]

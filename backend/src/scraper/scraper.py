@@ -21,6 +21,8 @@ class Scraper():
         self.url: str = url
         self.pages = pages
         self.movie_data: list[str] = []
+        self.movie_count: int = 0
+        self.steps: int = 0
 
     async def fetch_information(self):
         """
@@ -116,6 +118,7 @@ class Scraper():
                 'url': url,
                 'results': await task,
             })
+            self.steps += 1
         return results
 
     async def scrape_page_for_paths(
@@ -131,6 +134,8 @@ class Scraper():
             for movie in movies:
                 # href for url
                 movie_paths.append(movie['href'])
+            # Keep record of movies count on a page 
+            self.movie_count = len(movie_paths)
             return movie_paths
         except Exception as _exception:
             print(_exception)
@@ -156,10 +161,6 @@ class Scraper():
         """
         try:
             data: list[dict] = []
-
-            if soup is None:
-                print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
-                raise("Something went wrong with BeautifulSoup.")
             
             # Scrapes whole webpage that URL is on
             movie_content: Tag = soup.find(name='section', attrs={'class': 'inner_content movie_content backdrop poster'})

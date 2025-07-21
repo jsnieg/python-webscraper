@@ -62,6 +62,8 @@ A To Do list:
 
 5. Test running `/path/to/env/<your env>/bin/python backend/src/main.py` *should run the script.*
 
+6. Test running `/path/to/env/<your env>/bin/fastapi run backend/src/api/api.py` *it should run fastapi with docs, alternatively replace run with dev for hot-reload*.
+
 ## Authors
 
 Janusz Snieg

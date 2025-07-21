@@ -3,6 +3,7 @@ backend/db.sqlite3
 backend/src/misc/*
 backend/src/api/__pycache__
 backend/src/scraper/__pycache__
+./examples
 examples
 examples/*
 webscraper-env/*

@@ -20,11 +20,11 @@ A To Do list:
 
 ## Requirements
 
-- Python 3.13+
+- Python 3.12+
 - React + Vite
 - Colorama (console text color)
 - BeautifulSoup
-- AIO HTTP
+- Asyncio HTTP
 - FastAPI
 
 ## Running Locally
@@ -48,6 +48,20 @@ A To Do list:
 
 `Work in Progress`.
 
+1. Clone the repository
+
+    - `git clone https://github.com/jsnieg/python-webscraper.git <optional directory>`
+
+2. Move into the directory `cd <your directory>`
+
+3. Create a Python Virtual Environment (to not install packages system-wide)
+
+    - python -m venv /path/to/new/virtual/env
+
+4. Run `/path/to/venv/<your venv>/bin/pip install -r requirements.txt`
+
+5. Test running `/path/to/env/<your env>/bin/python backend/src/main.py` *should run the script.*
+
 ## Authors
 
 Janusz Snieg
@@ -55,3 +69,9 @@ Janusz Snieg
 ## Copyright
 
 TBA
+
+## Findings
+
+- This is a very first personal project where I sat down and actually coded something up by just using documentation, form of AI only for troubleshooting, relying on Stacks and articles found.
+
+- When moving development onto Linux, I came across issues of the OS refusal of installing packages on system-wide scale. Hence, I needed to move into virtual environemnts. As a challenge, I did not want to use `anaconda` but rather built-in `python` v-env and being able to successfully to run the script same way it did on Windows.

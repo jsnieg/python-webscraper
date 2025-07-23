@@ -21,6 +21,8 @@ class Scraper():
         self.url: str = url
         self.pages = pages
         self.movie_data: list[str] = []
+        self.movie_count: int = 0
+        self.steps: int = 0
 
     async def fetch_information(self):
         """
@@ -62,17 +64,19 @@ class Scraper():
             features=features
         )
 
-    # TODO: when fetch is called no url is set therefore default is used
     async def fetch(
             self, 
             session: aiohttp.ClientSession, 
-            url: str
+            url: str = None
         ) -> str:
         """
         Method for fetching webpage HTML as raw text.
         """
         # print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
         try:
+            if url is None:
+                url = self.url
+
             async with session.get(url) as response:
                 if response.status == 200:
                     #print(f"{Fore.GREEN}Response [{response.status}]{Style.RESET_ALL}")
@@ -84,6 +88,7 @@ class Scraper():
         except Exception as _exception:
             print(_exception)
            
+    # TODO; work with multiple pages       
     async def fetch_all(
             self, 
             session: aiohttp.ClientSession, 
@@ -96,17 +101,7 @@ class Scraper():
         results: list[dict] = []
         parsed_url: ParseResult = urlparse(self.url)
         parsed_url: str = f'{parsed_url.scheme}://{parsed_url.netloc}'
-        # for i in range(0, 3):
-        #     print(f'{self.url}?page={i}')
-        #     for path in paths:
-        #         url = f'{parsed_url}{path}?page={i}'
-        #         print(url)
-        #         task: asyncio.Task = asyncio.create_task(self.fetch(session=session, url=url))
-        #         results.append({
-        #             'url': url,
-        #             'results': await task,
-        #         })
-        # return results
+        self.steps = 0
 
         for path in paths:
             url = parsed_url + path
@@ -116,6 +111,7 @@ class Scraper():
                 'url': url,
                 'results': await task,
             })
+            self.steps += 1
         return results
 
     async def scrape_page_for_paths(
@@ -131,6 +127,8 @@ class Scraper():
             for movie in movies:
                 # href for url
                 movie_paths.append(movie['href'])
+            # Keep record of movies count on a page 
+            self.movie_count = len(movie_paths)
             return movie_paths
         except Exception as _exception:
             print(_exception)
@@ -156,10 +154,6 @@ class Scraper():
         """
         try:
             data: list[dict] = []
-
-            if soup is None:
-                print(f"[{datetime.datetime.now()}]{Fore.RED} Failed to eat BeautifulSoup...{Style.RESET_ALL}")
-                raise("Something went wrong with BeautifulSoup.")
             
             # Scrapes whole webpage that URL is on
             movie_content: Tag = soup.find(name='section', attrs={'class': 'inner_content movie_content backdrop poster'})

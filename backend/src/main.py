@@ -9,7 +9,7 @@ from colorama import Fore, Style
 
 # Local testing without running FastAPI    
 async def main() -> None:
-    scraper = Scraper()
+    scraper = Scraper(pages=3)
 
     movie_urls: list[str] = []
     movie_data: list[dict] = []
@@ -22,7 +22,6 @@ async def main() -> None:
 
     # Main page
     async with aiohttp.ClientSession() as session:
-        #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping main page...")
         html_page: str = await scraper.fetch(session=session, url=url)
         soup: BeautifulSoup = BeautifulSoup(
             markup=html_page,
@@ -33,7 +32,6 @@ async def main() -> None:
 
     # Movie Information
     async with aiohttp.ClientSession() as session:
-        #print(f"[{datetime.datetime.now()}] [{Fore.BLUE}*{Style.RESET_ALL}] Scraping movie information...")
         # Returns a list with corresponding URL and HTML as text result
         movies_html_page: list[dict] = await scraper.fetch_all(session=session, paths=movie_urls)
         for item in movies_html_page:
@@ -43,8 +41,14 @@ async def main() -> None:
             )
             movie_data.append(await scraper.scrape_movie_details(soup))
         print(movie_data)
+
+    import json
+    with open('examples/movie_data.json', 'w', encoding='utf-8') as f:
+        json.dump(movie_data, f, ensure_ascii=False, indent=4)
+
+    print(f'Movie toll: {scraper.movie_count}')
+    print(f'Steps taken: {scraper.steps}')
     print(f"[{datetime.datetime.now()}] [{Fore.GREEN}*{Style.RESET_ALL}] Done")
 
 if __name__ == '__main__':
     asyncio.run(main())
-

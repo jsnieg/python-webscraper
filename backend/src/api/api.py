@@ -3,7 +3,7 @@ from scraper.scraper import Scraper
 
 # FastAPI
 from typing import Annotated
-from fastapi import Body, FastAPI, Request
+from fastapi import Body, FastAPI, Request, HTTPException
 from pydantic import BaseModel, Field
 
 web_url = 'https://www.themoviedb.org'
@@ -39,6 +39,7 @@ async def status() -> dict:
 
     Call this GET method to see status of the API, whether the call was authorised or not.
     """
+    # TODO; add auth logic?
     return {'Response': str(True)}
 
 @app.get("/get_url")
@@ -49,6 +50,8 @@ async def get_url() -> dict:
     A function that returns the set url when POST request was called.
     """
     try:
+        if scraper.url == None:
+            raise HTTPException(status_code=404, detail='No URL was set. Use [/set_options] endpoint to set one.')
         return {'Response': scraper.url}
     except AttributeError as _exception:
         return {'Response': _exception}
@@ -68,8 +71,8 @@ async def scrape_pages() -> dict:
         print(_exception)
         return {'Response': 'Error'}
 
-@app.post("/set_url")
-async def set_url(
+@app.post("/set_options")
+async def set_options(
     url: str, 
     pages: int = 1, 
     scrape_url: ScrapeURL = ScrapeURL

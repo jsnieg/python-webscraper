@@ -64,17 +64,19 @@ class Scraper():
             features=features
         )
 
-    # TODO: when fetch is called no url is set therefore default is used
     async def fetch(
             self, 
             session: aiohttp.ClientSession, 
-            url: str
+            url: str = None
         ) -> str:
         """
         Method for fetching webpage HTML as raw text.
         """
         # print(f"[{datetime.datetime.now()}] Fetching HTML of URL: [{Fore.BLUE}{url}{Style.RESET_ALL}] w/", end=" ")
         try:
+            if url is None:
+                url = self.url
+
             async with session.get(url) as response:
                 if response.status == 200:
                     #print(f"{Fore.GREEN}Response [{response.status}]{Style.RESET_ALL}")
@@ -86,6 +88,7 @@ class Scraper():
         except Exception as _exception:
             print(_exception)
            
+    # TODO; work with multiple pages       
     async def fetch_all(
             self, 
             session: aiohttp.ClientSession, 
@@ -98,17 +101,7 @@ class Scraper():
         results: list[dict] = []
         parsed_url: ParseResult = urlparse(self.url)
         parsed_url: str = f'{parsed_url.scheme}://{parsed_url.netloc}'
-        # for i in range(0, 3):
-        #     print(f'{self.url}?page={i}')
-        #     for path in paths:
-        #         url = f'{parsed_url}{path}?page={i}'
-        #         print(url)
-        #         task: asyncio.Task = asyncio.create_task(self.fetch(session=session, url=url))
-        #         results.append({
-        #             'url': url,
-        #             'results': await task,
-        #         })
-        # return results
+        self.steps = 0
 
         for path in paths:
             url = parsed_url + path

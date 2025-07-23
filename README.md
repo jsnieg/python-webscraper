@@ -77,3 +77,5 @@ TBA
 - This is a very first personal project where I sat down and actually coded something up by just using documentation, form of AI only for troubleshooting, relying on Stacks and articles found.
 
 - When moving development onto Linux, I came across issues of the OS refusal of installing packages on system-wide scale. Hence, I needed to move into virtual environemnts. As a challenge, I did not want to use `anaconda` but rather built-in `python` v-env and being able to successfully to run the script same way it did on Windows.
+
+- Performance as of *23/07/2025* isn't a concern for this project, maybe down the line. However, aim of this was to learn basics/advanced usages of WebScraping and API development.

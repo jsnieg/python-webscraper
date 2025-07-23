@@ -9,7 +9,7 @@ from colorama import Fore, Style
 
 # Local testing without running FastAPI    
 async def main() -> None:
-    scraper = Scraper()
+    scraper = Scraper(pages=3)
 
     movie_urls: list[str] = []
     movie_data: list[dict] = []
